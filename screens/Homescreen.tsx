@@ -8,6 +8,7 @@ import Cards from "../Components/Cards";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ModalComponent from '../Components/Modal';
+import fetchPaginatedNews from '../requests/newsRequests/getPaginatedNews';
 
 
 
@@ -21,16 +22,17 @@ export default function App() {
   React.useEffect(() => {
    const fetchData = async () => {
     setLoading(true)
-    const response  = await axios.get(`/news?page=${page}&limit=10`).then(response =>  response.data).catch(error => {
-      console.log(error.response)
-    }).finally(() => {
-      setLoading(false)
-    })
+    try {
+      const response = await fetchPaginatedNews(page)
+      setData(response)
+    setLoading(false)
 
-    setData(response)
+    } catch(err) {
+      setLoading(false)
+    }
    }
    fetchData()
-  }, [page])
+  }, [page, modalVisible])
   const renderItem = ({item} : any) => {
 return (
   <View style={{paddingHorizontal: 10, paddingVertical: 10}}>

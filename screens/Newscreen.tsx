@@ -8,9 +8,11 @@ import DeleteNews from "../requests/newsRequests/deleteNews";
 import EditModalComponent from "../Components/EditModal";
 import AddImageModalComponent from "../Components/AddImageModal";
 import AddCommentModalComponent from "../Components/PostComments";
+import GetNews from "../requests/newsRequests/getNews";
+import fetchImageData from "../requests/ImageRequests/fetchImage";
 
 const Newscreen = (props: any) => {
-  const news = props.route.params.data;
+  const [news, setNews] = React.useState(props.route.params.data)
   const [images, setImages] = React.useState([]);
   const [loadingImages, setLoadingImages] = React.useState(false);
   const [comments, setComments] = React.useState([]);
@@ -20,17 +22,25 @@ const Newscreen = (props: any) => {
   const [addCommentModalVisible, setAddCommentModalVisible] = React.useState(false);
 
 
+  React.useEffect(() => {
+      const fetchData = async () => { 
+        const response = await GetNews(news.id)
+        setNews(response)
+      }
+      fetchData()
+  }, [modalVisible, addImageModalVisible, addCommentModalVisible])
 
   React.useEffect(() => {
     setLoadingImages(true)
     const fetchData = async () => {
-      const response = await axios
-        .get(`/news/${news.id}/images`)
-        .then((res) => res.data)
-        .catch((err) => err.response).finally(() => {
+      try {
+        const response = await fetchImageData(news.id)
           setLoadingImages(false)
-        })
       setImages(response)
+      } catch (err) { 
+          setLoadingImages(false)
+
+      }
     };
     fetchData();
   }, [modalVisible, addImageModalVisible, addCommentModalVisible]);
@@ -69,9 +79,9 @@ const Newscreen = (props: any) => {
 
   return (
     <ScrollView>
-      <View> 
-      <Button title="Edit News" onPress={() => setModalVisible(true)} />
+      <View style={{display: "flex", flexDirection: "row", alignItems: "center",  justifyContent:"space-between"}}> 
       <Button title="Delete News" onPress={deleteNews} />
+      <Button title="Edit News" onPress={() => setModalVisible(true)} />
       </View>
      
 
